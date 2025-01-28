@@ -1,0 +1,19 @@
+{
+  "name": "chickentracker",
+  "version": "1.0.0",
+  "description": "An app to track properties of your chickens",
+  "main": "src/main/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron src/main/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "electron": "^34.0.1",
+    "electron-store": "^10.0.0",
+    "sqlite3": "^5.1.7"
+  }
+}

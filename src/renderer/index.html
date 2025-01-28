@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chicken Tracker</title>
+    <link rel="stylesheet" href="./styles/style.css" />
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                🐔 Chicken Tracker
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" data-page="dashboard" class="active">Dashboard</a></li>
+                <li><a href="#" data-page="all-chickens">All Chickens</a></li>
+                <li><a href="#" data-page="add-chicken">Add Chicken</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Content gets put here -->
+        </main>
+    </div>
+
+    <div class="modal" id="chickenModal">
+        <div class="modal-content">
+            <h2>Add New Chicken</h2>
+            <form id="chickenForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="sex">Sex</label>
+                    <select id="sex" required>
+                        <option value="">Select sex</option>
+                        <option value="hen">Hen</option>
+                        <option value="rooster">Rooster</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="species">Species</label>
+                    <input type="text" id="species">
+                </div>
+                <div class="form-group">
+                    <label for="birthday">Birthday</label>
+                    <input type="date" id="birthday">
+                </div>
+                <div class="form-group">
+                    <label for="photo">Photo</label>
+                    <input type="file" id="photo" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="notes">Initial Notes</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn">Save Chicken</button>
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../renderer/scripts/renderer.js"></script>
+</body>
+
+</html>
