@@ -1,4 +1,3 @@
-// src/renderer/scripts/renderer.js
 class ChickenUI {
     constructor() {
         this.modal = document.getElementById('chickenModal');
@@ -64,7 +63,7 @@ class ChickenUI {
                     <h1>Dashboard</h1>
                     <button class="btn" id="addChickenBtn">+ Add Chicken</button>
                 </div>
-
+    
                 <div class="dashboard-stats">
                     <div class="stat-card">
                         <h3>Total Chickens</h3>
@@ -79,30 +78,30 @@ class ChickenUI {
                         <p>${roosters.length}</p>
                     </div>
                 </div>
-
+    
                 ${hens.length > 0 ? `
                     <div class="section">
                         <h2>Hens</h2>
                         <div class="chicken-grid">
-                            ${hens.map(chicken => this.createChickenCard(chicken).outerHTML).join('')}
+                            ${hens.map(chicken => this.createChickenCard(chicken)).join('')}
                         </div>
                     </div>
                 ` : ''}
-
+    
                 ${roosters.length > 0 ? `
                     <div class="section">
                         <h2>Roosters</h2>
                         <div class="chicken-grid">
-                            ${roosters.map(chicken => this.createChickenCard(chicken).outerHTML).join('')}
+                            ${roosters.map(chicken => this.createChickenCard(chicken)).join('')}
                         </div>
                     </div>
                 ` : ''}
-
+    
                 ${unknown.length > 0 ? `
                     <div class="section">
                         <h2>Unknown</h2>
                         <div class="chicken-grid">
-                            ${unknown.map(chicken => this.createChickenCard(chicken).outerHTML).join('')}
+                            ${unknown.map(chicken => this.createChickenCard(chicken)).join('')}
                         </div>
                     </div>
                 ` : ''}
@@ -110,8 +109,13 @@ class ChickenUI {
 
             // Rebind events
             this.addButton = document.getElementById('addChickenBtn');
-            this.addButton.addEventListener('click', () => this.openModal());
+            if (this.addButton) {
+                this.addButton.addEventListener('click', () => this.openModal());
+            }
+
+            // Bind events for all chicken cards
             this.bindChickenCardEvents();
+
         } catch (error) {
             console.error('Error loading dashboard:', error);
             alert('Failed to load dashboard');
@@ -202,35 +206,34 @@ class ChickenUI {
     }
 
     createChickenCard(chicken) {
-        const card = document.createElement('div');
-        card.className = 'chicken-card';
-
-        card.innerHTML = `
-            <div class="chicken-image">
-                ${chicken.photoPath
-                ? `<img src="${chicken.photoPath}" alt="${chicken.name}">`
+        const cardHtml = `
+            <div class="chicken-card">
+                <div class="chicken-image">
+                    ${chicken.photoData
+                ? `<img src="${chicken.photoData}" alt="${chicken.name}">`
                 : '🐔'}
-            </div>
-            <div class="chicken-info">
-                <h3><a href="#" class="chicken-name-link" data-id="${chicken.id}">${chicken.name}</a></h3>
-                <p><strong>Sex:</strong> ${chicken.sex || 'Unknown'}</p>
-                <p><strong>Species:</strong> ${chicken.species || 'Unknown'}</p>
-                <p><strong>Birthday:</strong> ${chicken.birthday || 'Unknown'}</p>
-                ${chicken.latest_note ? `
-                    <p class="latest-note">
-                        <strong>Latest Note (${new Date(chicken.latest_note_timestamp).toLocaleDateString()}):</strong><br>
-                        ${chicken.latest_note}
-                    </p>
-                ` : ''}
-            </div>
-            <div class="chicken-actions">
-                <button class="btn btn-small add-note-btn" data-id="${chicken.id}">Add Note</button>
-                <button class="btn btn-small view-notes-btn" data-id="${chicken.id}">View Notes</button>
-                <button class="btn btn-small btn-delete" data-id="${chicken.id}">Delete</button>
+                </div>
+                <div class="chicken-info">
+                    <h3><a href="#" class="chicken-name-link" data-id="${chicken.id}">${chicken.name}</a></h3>
+                    <p><strong>Sex:</strong> ${chicken.sex || 'Unknown'}</p>
+                    <p><strong>Species:</strong> ${chicken.species || 'Unknown'}</p>
+                    <p><strong>Birthday:</strong> ${chicken.birthday || 'Unknown'}</p>
+                    ${chicken.latest_note ? `
+                        <p class="latest-note">
+                            <strong>Latest Note (${new Date(chicken.latest_note_timestamp).toLocaleDateString()}):</strong><br>
+                            ${chicken.latest_note}
+                        </p>
+                    ` : ''}
+                </div>
+                <div class="chicken-actions">
+                    <button class="btn btn-small add-note-btn" data-id="${chicken.id}">Add Note</button>
+                    <button class="btn btn-small view-notes-btn" data-id="${chicken.id}">View Notes</button>
+                    <button class="btn btn-small btn-delete" data-id="${chicken.id}">Delete</button>
+                </div>
             </div>
         `;
 
-        return card;
+        return cardHtml;  // Return the HTML string directly
     }
 
     bindChickenCardEvents() {
@@ -270,6 +273,7 @@ class ChickenUI {
             const chickens = await window.electronAPI.getChickens();
             const chicken = chickens.find(c => c.id === chickenId);
             const notes = await window.electronAPI.getNotes(chickenId);
+            const images = await window.electronAPI.getChickenImages(chickenId);
 
             this.mainContent.innerHTML = `
                 <div class="content-header">
@@ -279,12 +283,6 @@ class ChickenUI {
                 
                 <div class="chicken-profile">
                     <div class="profile-section">
-                        <div class="chicken-image-large">
-                            ${chicken.photoPath
-                    ? `<img src="${chicken.photoPath}" alt="${chicken.name}">`
-                    : '🐔'}
-                        </div>
-                        
                         <div class="chicken-details">
                             <h2>Details</h2>
                             <p><strong>Sex:</strong> ${chicken.sex || 'Unknown'}</p>
@@ -294,12 +292,44 @@ class ChickenUI {
                         </div>
                     </div>
     
+                    <div class="images-section">
+                        <div class="images-header">
+                            <h2>Photos</h2>
+                            <button class="btn" id="addImagesBtn">Add Photos</button>
+                        </div>
+                        <div class="images-grid">
+                            ${images.map((img, index) => `
+                                <div class="image-card">
+                                    <div class="image-container">
+                                        <img src="${img.data}" alt="${chicken.name}" loading="lazy">
+                                        <div class="image-overlay">
+                                            <button class="btn btn-small btn-img" onclick="chickenUI.openGallery(${index})">View</button>
+                                            ${img.isPrimary
+                    ? `<button class="btn btn-small" disabled>Primary</button>`
+                    : `<button class="btn btn-small" onclick="chickenUI.setPrimaryImage(${img.id}, ${chickenId})">
+                                                                                Set as Primary
+                                                                               </button>`
+                }
+                                            <button class="btn btn-small btn-delete" onclick="chickenUI.deleteImage(${img.id}, ${chickenId})">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="image-info">
+                                        <div class="image-timestamp">
+                                            ${new Date(img.timestamp).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+    
                     <div class="notes-section">
                         <div class="notes-header">
                             <h2>Notes</h2>
                             <button class="btn add-note-btn" data-id="${chicken.id}">Add Note</button>
                         </div>
-                        
                         <div class="notes-timeline">
                             ${notes.map(note => `
                                 <div class="note-item">
@@ -312,8 +342,12 @@ class ChickenUI {
                 </div>
             `;
 
-            // Rebind events for the new content
-            document.querySelector('.add-note-btn').addEventListener('click', () => this.addNote(chickenId));
+            // Store images for gallery view
+            this.currentImages = images;
+            this.currentChickenId = chickenId;
+
+            // Bind events
+            this.bindChickenPageEvents(chickenId);
 
         } catch (error) {
             console.error('Error loading chicken page:', error);
@@ -426,6 +460,95 @@ class ChickenUI {
             console.error('Error loading notes:', error);
             alert('Failed to load notes');
         }
+    }
+
+    bindChickenPageEvents(chickenId) {
+        const addImagesBtn = document.getElementById('addImagesBtn');
+        if (addImagesBtn) {
+            addImagesBtn.addEventListener('click', () => this.addImages(chickenId));
+        }
+    }
+
+    addImages(chickenId) {
+        window.electronAPI.openFileDialog().then(async (result) => {
+            if (!result.canceled && result.filePaths.length > 0) {
+                try {
+                    for (const filePath of result.filePaths) {
+                        console.log('Selected file:', filePath);
+                        await window.electronAPI.addImage(chickenId, filePath);
+                    }
+                    this.showChickenPage(chickenId);
+                } catch (error) {
+                    console.error('Error adding images:', error);
+                    alert('Failed to add images: ' + error.message);
+                }
+            }
+        }).catch(error => {
+            console.error('Error opening file dialog:', error);
+            alert('Failed to open file dialog');
+        });
+    }
+
+    async setPrimaryImage(imageId, chickenId) {
+        try {
+            await window.electronAPI.setPrimaryImage(imageId, chickenId);
+            this.showChickenPage(chickenId);
+        } catch (error) {
+            console.error('Error setting primary image:', error);
+            alert('Failed to set primary image');
+        }
+    }
+
+    async deleteImage(imageId, chickenId) {
+        if (confirm('Are you sure you want to delete this image?')) {
+            try {
+                await window.electronAPI.deleteImage(imageId);
+                this.showChickenPage(chickenId);
+            } catch (error) {
+                console.error('Error deleting image:', error);
+                alert('Failed to delete image');
+            }
+        }
+    }
+
+    openGallery(startIndex) {
+        const modal = document.createElement('div');
+        modal.className = 'gallery-modal';
+
+        let currentIndex = startIndex;
+
+        const updateImage = () => {
+            const image = this.currentImages[currentIndex];
+            modal.innerHTML = `
+                <div class="gallery-content">
+                    <img src="${image.data}" alt="" class="gallery-image">
+                    <div class="gallery-nav gallery-prev">&lt;</div>
+                    <div class="gallery-nav gallery-next">&gt;</div>
+                    <div class="gallery-close">×</div>
+                </div>
+            `;
+
+            // Bind navigation events
+            modal.querySelector('.gallery-prev').onclick = () => {
+                currentIndex = (currentIndex - 1 + this.currentImages.length) % this.currentImages.length;
+                updateImage();
+            };
+
+            modal.querySelector('.gallery-next').onclick = () => {
+                currentIndex = (currentIndex + 1) % this.currentImages.length;
+                updateImage();
+            };
+
+            modal.querySelector('.gallery-close').onclick = () => modal.remove();
+        };
+
+        document.body.appendChild(modal);
+        updateImage();
+
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
     }
 }
 
