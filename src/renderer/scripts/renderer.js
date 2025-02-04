@@ -176,6 +176,12 @@ class ChickenUI {
 
     openModal() {
         this.modal.classList.add('active');
+        setTimeout(() => {
+            const nameInput = document.getElementById('name');
+            if (nameInput) {
+                nameInput.focus();
+            }
+        }, 10);
     }
 
     closeModal() {
@@ -416,6 +422,7 @@ class ChickenUI {
         if (confirm('Are you sure you want to delete this chicken?')) {
             try {
                 await window.electronAPI.deleteChicken(id);
+                await window.electronAPI.resetWindowFocus();
                 this.loadDashboard();
             } catch (error) {
                 console.error('Error deleting chicken:', error);

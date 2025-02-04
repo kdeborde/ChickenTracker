@@ -26,6 +26,17 @@ class ChickenTracker {
     }
 
     setupIpcHandlers() {
+        ipcMain.handle('reset-window-focus', async () => {
+            try {
+                this.window.blur();
+                this.window.focusOnWebView();
+                return true;
+            } catch (error) {
+                console.error('Error resetting focus:', error);
+                return false;
+            }
+        });
+
         ipcMain.handle('add-chicken', async (event, chicken) => {
             try {
                 return await this.db.addChicken(chicken);
